@@ -1,0 +1,52 @@
+uniform sampler2D sampler2d0; //displacement map
+uniform sampler2D sampler2d1; //color map
+uniform sampler2D sampler2d2; //normal map
+
+varying vec4 pontoEntrada;
+
+int numeroPassos = 200;
+float profundidade = 0.25;
+
+vec2 coordTextura(vec2 p)
+{
+	return (p + vec2(1.0))/2.0;
+}
+
+float altura(vec3 p)
+{
+	return texture2D(sampler2d0, coordTextura(p.xy)).z; //texture2D(textura, coordenada)
+}
+
+vec3 cor(vec3 p)
+{
+	return texture2D(sampler2d1, coordTextura(p.xy)).rgb;
+}
+
+
+void main()
+{
+	vec4 posicaoCamera = ((gl_ModelViewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0)));
+
+	vec3 p = pontoEntrada;
+	vec3 direcaoRaio = normalize(p - posicaoCamera.xyz);
+
+	float range = 0.01f;
+
+	vec3 stepTrace = range*direcaoRaio;
+	p.z = 10;
+
+	stepTrace.z /= profundidade;
+
+	for(int i=0; i<numeroPassos; i++)
+	{
+		if(p.x > 1.0 || p.x < -1.0)
+			discard;
+		if(p.y > 1.0 || p.y < -1.0)
+			discard;
+		if (altura(p) >= p.z)
+ 			break;
+		p += stepTrace;
+	}
+	gl_FragColor.rgb = cor(p);
+	gl_FragColor.a = 1.0;
+}
