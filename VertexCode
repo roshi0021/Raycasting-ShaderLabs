@@ -1,0 +1,7 @@
+varying vec4 pontoEntrada;
+
+void main ()
+{
+	pontoEntrada = gl_Vertex;
+	gl_Position = ftransform();
+}
